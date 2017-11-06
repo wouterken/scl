@@ -1,10 +1,10 @@
-module SSS
+module Scl
   class RSA
     attr_reader :private, :public
-    def initialize(file: nil, public: nil, private: nil)
+    def initialize(file: nil, public: nil, private: nil, input_encoder: Format::BINARY, output_encoder: Format::BINARY)
       if file
-        @public  = OpenSSL::PKey::RSA.new(IO.read("#{file}.pub")) if File.exists?("#{file}.pub")
-        @private = OpenSSL::PKey::RSA.new(IO.read("#{file}.priv")) if File.exists?("#{file}.priv")
+        @public  = OpenSSL::PKey::RSA.new(encoder.decode(IO.read("#{file}.pub"))) if File.exists?("#{file}.pub")
+        @private = OpenSSL::PKey::RSA.new(encoder.decode(IO.read("#{file}.priv"))) if File.exists?("#{file}.priv")
       else
         @public  = public
         @private = private
@@ -14,13 +14,13 @@ module SSS
     end
 
     def save(dir, name='rsa-keypair')
-      IO.write(File.join(dir, "#{name}.pub"), @public.export)
-      IO.write(File.join(dir, "#{name}.priv"), @private.export)
+      IO.write(File.join(dir, "#{name}.pub"),  output_encoder.encode(@public.export))
+      IO.write(File.join(dir, "#{name}.priv"), output_encoder.encode(@private.export))
       dir
     end
 
-    def self.generate
-      rsa_pair = OpenSSL::PKey::RSA.new(2048)
+    def self.generate(key_size)
+      rsa_pair = OpenSSL::PKey::RSA.new(key_size || 2048)
       RSA.new(public: rsa_pair.public_key, private: rsa_pair)
     end
 
@@ -33,6 +33,7 @@ module SSS
       attr_reader :rsa
       def initialize(rsa)
         @rsa = rsa
+        @aes = Scl::AES.new
       end
 
       def sign(data)
@@ -44,10 +45,7 @@ module SSS
       end
 
       def encrypt(plaintext, key=nil, iv=nil)
-        block_cipher = OpenSSL::Cipher::AES.new(256, :CBC)
-        block_cipher.encrypt
-        block_cipher.key = key ||= block_cipher.random_key
-        block_cipher.iv  = iv  ||= block_cipher.random_iv
+        ciphertext, key, iv = @aes.encrypt(plaintext, key, iv)
         encrypted_key =
           case
           when rsa.private? then rsa.private_encrypt(key)
@@ -58,17 +56,12 @@ module SSS
 
       def decrypt(ciphertext)
         encrypted_key, iv, ciphertext = ciphertext.split('::')
-        block_cipher = OpenSSL::Cipher::AES.new(256, :CBC)
-        block_cipher.decrypt
         decrypted_key =
           case
           when rsa.private? then rsa.private_decrypt(encrypted_key)
           else rsa.public_decrypt(encrypted_key)
           end
-        block_cipher.decrypt
-        block_cipher.key = decrypted_key
-        block_cipher.iv  =  iv
-        block_cipher.update( ciphertext ) + block_cipher.final
+        @aes.decrypt(ciphertext, decrypted_key, iv)
       end
 
       def export

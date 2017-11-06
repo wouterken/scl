@@ -1,14 +1,14 @@
 require 'openssl'
 require 'ostruct'
 
-module SSS
-  # PRIME              = OpenSSL::BN.new("12444564549162300069543775116623647877224518987958124815625997062953405635547036772213547239478998264319051058804208632790257230105943289608172167621038647")
+module Scl
   PRIME = OpenSSL::BN.new("214663014907494254264734401372860550616125566004826012670437788223410219893687")
   ENCODED_CHUNK_SIZE = 44
 
   class SecretShare
-    def initialize(minimum, shares)
+    def initialize(minimum, shares, encoder: Format::BASE64)
       raise "Minimum must be larger than zero and less than shares" unless (0..shares) === minimum
+      @encoder = encoder
       @minimum = minimum
       @shares  = shares
     end
@@ -51,16 +51,16 @@ module SSS
           result << base64_encode(x)
           result << base64_encode(y)
         end
-        result
+        @encoder == Format::BASE64 ? result : @encoder.encode(result)
       end
     end
 
     def base64_encode(number)
-      return Base64.urlsafe_encode64(number.to_s(16).rjust(64, ?0).scan(/../).map{|x| x.hex.chr}.join)
+      return ::Base64.urlsafe_encode64(number.to_s(16).rjust(64, ?0).scan(/../).map{|x| x.hex.chr}.join)
     end
 
     def self.base64_decode(number)
-      Base64.urlsafe_decode64(number).chars.map{|x| "0#{x.ord.to_s(16)}"[-2..-1] }.join.rjust(64, ?0).hex
+      ::Base64.urlsafe_decode64(number).chars.map{|x| "0#{x.ord.to_s(16)}"[-2..-1] }.join.rjust(64, ?0).hex
     end
 
     def self.extended_gcd(a, b)
@@ -84,6 +84,7 @@ module SSS
     def self.combine(shares)
       abs = ->(v){ v < 0 ? v * -1 : v}
       decoded = shares.map do |share|
+        share = @encoder == Format::BASE64 ? share : @encoder.decode(share)
         share.chars.each_slice(ENCODED_CHUNK_SIZE).map(&:join).each_slice(2).map do |random, polynomial|
           OpenStruct.new({
             x: base64_decode(random),

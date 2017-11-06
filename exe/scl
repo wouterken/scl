@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "scl"
+require 'optparse'
+require 'pry-byebug'
+
+Options = Struct.new(
+  :input_format,
+  :output_format,
+  :key_format,
+  :module,
+  :action,
+  :verbose,
+  :key_path,
+  :key_size,
+  :private_key_file,
+  :public_key_file,
+  :output_file
+)
+
+args = Options.new()
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: scl [mode] [command] [options] "
+
+  opts.separator ""
+  opts.separator "Where mode is one of (aes, rsa, dh, sss)"
+  opts.separator ""
+  opts.separator "Where options are:"
+
+  opts.on("-v", "--verbose", "Verbose output") do
+    args.verbose = true
+  end
+
+  opts.on(%i(words qrcode base64 binary), "-f[FORMAT]", "--format[=FORMAT]", "Format to use for output, one of base64, qrcode, words, none") do |f|
+    puts "Selected format #{f}" if args.verbose
+    args.output_format = f
+  end
+
+  opts.on(%i(words qrcode base64 binary), "-i[INPUT_FORMAT]", "--input-format[=INPUT_FORMAT]", "Format to use for input, one of base64, qrcode, words, none") do |f|
+    puts "Selected input format #{f}" if args.verbose
+    args.input_format = f
+  end
+
+  opts.on(%i(words qrcode base64 binary), "-b[KEY_FORMAT]", "--key-format[=KEY_FORMAT]", "Format to use for keys, one of base64, qrcode, words, none") do |f|
+    puts "Selected key format #{f}" if args.verbose
+    args.key_format = f
+  end
+
+  opts.on("-k[KEY_PATH]", "--key-path[=KEY_PATH]", "The path of the keys to use (Looks for [key_path].pub and [key_path].priv)") do |p|
+    puts "Selected key path #{p}" if args.verbose
+    args.key_path = p
+  end
+
+  opts.on("-Z[PRIVATE_KEY]", "--priv-key[=PRIVATE_KEY]", "Private key file to use") do |p|
+    puts "Using private key file #{p}" if args.verbose
+    args.private_key_file = p
+  end
+
+  opts.on("-p[PUBLIC_KEY]", "--pub-key[=PUBLIC_KEY]", "Public key file to use") do |p|
+    puts "Using public key file #{p}" if args.verbose
+    args.public_key_file = p
+  end
+
+  opts.on("-o[OUTPUT_FILE]", "--out[=OUTPUT_FILE]", "File or file-prefix for where to save outputs") do |p|
+    puts "Using output file #{p}" if args.verbose
+    args.output_file = p
+  end
+
+
+  opts.on("-s[KEY_SIZE]", "--key-size[=KEY_SIZE]", Integer, "Size of the generated key") do |ks|
+    puts "Using key size #{ks}" if args.verbose
+    args.key_size = ks
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end
+
+opt_parser.parse!
+unless ARGV.any?
+  opt_parser.parse("--help")
+else
+  Scl::Control::Controller.new(args)
+                          .module(ARGV.shift)
+                          .action(ARGV.shift, ARGV)
+end
