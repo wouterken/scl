@@ -3,9 +3,9 @@ require 'ostruct'
 
 module SSS
   # PRIME              = OpenSSL::BN.new("12444564549162300069543775116623647877224518987958124815625997062953405635547036772213547239478998264319051058804208632790257230105943289608172167621038647")
-  PRIME = OpenSSL::BN.new("115792089237316195423570985008687907853269984665640564039457584007913129639747")
+  PRIME = OpenSSL::BN.new("214663014907494254264734401372860550616125566004826012670437788223410219893687")
+  ENCODED_CHUNK_SIZE = 44
 
-  ENCODED_CHUNK_SIZE = 175
   class SecretShare
     def initialize(minimum, shares)
       raise "Minimum must be larger than zero and less than shares" unless (0..shares) === minimum
@@ -38,7 +38,7 @@ module SSS
 
     def generate(secret)
       polynomials = chunks(secret).map do |chunk|
-        polynomial = [chunk] + @minimum.times.map do |i|
+        polynomial = [chunk] + (@minimum - 1).times.map do |i|
           random
         end
       end
@@ -48,19 +48,19 @@ module SSS
         poly_result = polynomials.map do |polynomial|
           x = random
           y = evaluate_polynomial(polynomial, x)
-          result << base64_encode(x.to_s(16))
-          result << base64_encode(y.to_s(16))
+          result << base64_encode(x)
+          result << base64_encode(y)
         end
         result
       end
     end
 
-    def base64_encode(x)
-      return Base64.encode64(x.rjust(64,'0'))
+    def base64_encode(number)
+      return Base64.urlsafe_encode64(number.to_s(16).rjust(64, ?0).scan(/../).map{|x| x.hex.chr}.join)
     end
 
-    def self.base64_decode(x)
-      OpenSSL::BN.new(Base64.decode64(x).gsub(/^0+/,''), 16)
+    def self.base64_decode(number)
+      Base64.urlsafe_decode64(number).chars.map{|x| "0#{x.ord.to_s(16)}"[-2..-1] }.join.rjust(64, ?0).hex
     end
 
     def self.extended_gcd(a, b)
@@ -78,9 +78,6 @@ module SSS
 
     def self.mod_inverse(e, p=PRIME)
       g, x = extended_gcd(e, p)
-      if g != 1
-        raise "Couldnt mod_inverse #{e}"
-      end
       x % p
     end
 
@@ -103,30 +100,21 @@ module SSS
           decoded.each do |peer|
             if peer != share
               current = peer[chunk].x
-              negative = OpenSSL::BN.new(-1) * current
-              added = point.x - current
-              numerator = ((numerator * negative) % PRIME)
-              denominator = (denominator * added) % PRIME
+              numerator =  OpenSSL::BN.new((numerator * -current).to_i % PRIME)
+              denominator = OpenSSL::BN.new((denominator * (point.x - current)).to_i  % PRIME)
             end
           end
-          working = (point.y * numerator) * mod_inverse(denominator)
-          secret = (secret + working) % PRIME
+          working = (point.y * numerator) * mod_inverse(denominator) + PRIME
+          secret = ((secret + working) + 1000 * PRIME) % PRIME
         end
         secret
       end
 
-      hex_data = ""
-      chunks.each do |chunk|
-        hex_data << chunk.to_s(16).rjust(64, "0")
-      end
+      hex_data = chunks.map{|chunk| chunk.to_s(16).rjust(64, "0") }.join
       hex_data.chars.each_slice(64).map(&:join).map do |chunk|
         chunk.gsub(/(?:00)+$/,'').chars.each_slice(2).map{|pair|
-          begin
-            pair.join.to_i(16).chr
-          rescue
-            binding.pry
-          end
-      }
+          pair.join.to_i(16).chr
+        }
       end.join
     end
   end
