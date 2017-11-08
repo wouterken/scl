@@ -51,7 +51,7 @@ module Scl
           when rsa.private? then rsa.private_encrypt(key)
           else rsa.public_encrypt(key)
           end
-        [encrypted_key, iv, block_cipher.update(plaintext) + block_cipher.final].join('::')
+        [encrypted_key, iv, ciphertext].join('::')
       end
 
       def decrypt(ciphertext)

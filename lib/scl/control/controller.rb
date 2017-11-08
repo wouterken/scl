@@ -1,15 +1,25 @@
 module Scl
   module Control
     class Controller
-      attr_reader :args, :output_encoder, :input_decoder
+      attr_reader :args
       def initialize(args)
         @args = args
-        @output_encoder = coder_for(args.output_format)
-        @input_decoder  = coder_for(args.input_format)
-        @key_coder    = coder_for(args.key_format)
         puts "Using output format #{@output_encoder.name}" if args.verbose
         puts "Using input format #{@input_decoder.name}" if args.verbose
       end
+
+      def output_encoder
+        coder_for(args.output_format)
+      end
+
+      def input_decoder
+        coder_for(args.input_format)
+      end
+
+      def key_coder
+        coder_for(args.key_format)
+      end
+
 
       def output_file
         "#{@args.output_file}".strip
@@ -29,11 +39,13 @@ module Scl
 
       def coder_for(format)
         case "#{format}".strip
-        when "base64" then Format::BASE64
-        when "qrcode" then Format::QRCODE
-        when "base64" then Format::BASE64
-        when "words"  then Format::WORDS
-        when "binary","text","none","" then Format::BINARY
+        when "base64"               then Format::BASE64
+        when "qrcode"               then Format::QRCODE
+        when "base64"               then Format::BASE64
+        when "words"                then Format::WORDS
+        when "hex"                  then Format::HEX
+        when "binary","text","none" then Format::BINARY
+        when "", "auto"             then Format::AUTO
         else
           puts "Unexpected format \"#{format}\""
           exit(1)

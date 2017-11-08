@@ -26,6 +26,8 @@ require 'scl/formats/base64'
 require 'scl/formats/binary'
 require 'scl/formats/qrcode'
 require 'scl/formats/words'
+require 'scl/formats/auto'
+require 'scl/formats/hex'
 
 module Scl
   class Format
@@ -34,5 +36,7 @@ module Scl
     BINARY = Scl::Binary.new
     WORDS  = Scl::Words.new
     QRCODE = Scl::QRCode.new
+    HEX    = Scl::Hex.new
+    AUTO   = Scl::Auto.new
   end
 end

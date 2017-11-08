@@ -32,17 +32,17 @@ opt_parser = OptionParser.new do |opts|
     args.verbose = true
   end
 
-  opts.on(%i(words qrcode base64 binary), "-f[FORMAT]", "--format[=FORMAT]", "Format to use for output, one of base64, qrcode, words, none") do |f|
+  opts.on(%i(words qrcode base64 binary hex), "-f[FORMAT]", "--format[=FORMAT]", "Format to use for output, one of base64, qrcode, words, hex, none") do |f|
     puts "Selected format #{f}" if args.verbose
     args.output_format = f
   end
 
-  opts.on(%i(words qrcode base64 binary), "-i[INPUT_FORMAT]", "--input-format[=INPUT_FORMAT]", "Format to use for input, one of base64, qrcode, words, none") do |f|
+  opts.on(%i(words qrcode base64 binary hex), "-i[INPUT_FORMAT]", "--input-format[=INPUT_FORMAT]", "Format to use for input, one of base64, qrcode, words, hex, none") do |f|
     puts "Selected input format #{f}" if args.verbose
     args.input_format = f
   end
 
-  opts.on(%i(words qrcode base64 binary), "-b[KEY_FORMAT]", "--key-format[=KEY_FORMAT]", "Format to use for keys, one of base64, qrcode, words, none") do |f|
+  opts.on(%i(words qrcode base64 binary hex), "-b[KEY_FORMAT]", "--key-format[=KEY_FORMAT]", "Format to use for keys, one of base64, qrcode, words, hex, none") do |f|
     puts "Selected key format #{f}" if args.verbose
     args.key_format = f
   end

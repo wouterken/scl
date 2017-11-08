@@ -35,6 +35,8 @@ module Scl
             self.send(action_name, *args)
           rescue ControlError => e
             puts e.message
+            puts e.cause
+            puts e.cause.backtrace if self.args.verbose
           end
         else
           puts "Command not supported: \"#{action_name}\""
