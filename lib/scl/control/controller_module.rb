@@ -52,10 +52,6 @@ module Scl
         end
         exit(0)
       end
-      #   if help?
-      #
-      #   end
-      # end
 
       def action(action_name, args)
         args = args.dup
@@ -76,10 +72,11 @@ module Scl
             puts e.message
             puts "#{action_name} expects #{required_args} arguments by default\nE.g.\n#{action_name} #{action.parameters.map(&:last).map{|x| "[#{x}]"}[-required_args..-1].join(' ')}"
             self.class.print_help(@controller.args, action_name)
+            puts e.backtrace if @controller.verbose?
           rescue ControlError => e
             puts e.message
             puts e.cause
-            puts e.cause.backtrace if self.args.verbose
+            puts e.cause.backtrace if @controller.verbose?
             self.class.print_help(@controller.args, action_name)
           end
         else
@@ -91,9 +88,12 @@ module Scl
       end
 
       private
-        def read_file(file)
+        def read_file(file, label='', help)
+          unless file
+            raise ControlError.new("Expected #{label} file not given\n#{help}")
+          end
           unless File.exists?(file)
-            raise ControlError.new("Expected file #{file} doesnt exist")
+            raise ControlError.new("Expected #{label} file #{file} doesnt exist\n#{help}")
           end
           IO.read(file)
         end

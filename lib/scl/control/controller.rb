@@ -34,6 +34,7 @@ module Scl
         when "rsa" then Control::RSA.new(self)
         when "dh"  then Control::DH.new(self)
         when "sss"  then Control::SSS.new(self)
+        when "digest"  then Control::Digest.new(self)
         else
           puts "No scl module found \"#{module_name}\""
           puts args.opts
@@ -50,6 +51,7 @@ module Scl
         when "hex"                  then Format::HEX
         when "binary","text","none" then Format::BINARY
         when "", "auto"             then Format::AUTO
+        when "stdout"               then Format::STDOUT
         else
           puts "Unexpected format \"#{format}\""
           exit(1)
@@ -60,14 +62,18 @@ module Scl
         case output_file
         when '' then
           puts "\n\n"
-          puts results.map{|r| output_encoder.encode(r.content) }.join("\n\n")
+          puts results.compact.map{|r| output_encoder.encode(r.content) }.join("\n\n")
         else
-          results.each do |result|
+          results.compact.each do |result|
             puts "Writing #{result.file(output_file)}" if verbose?
-            IO.write(
-              result.file(output_file),
+            if args.output_format == 'stdout'
               output_encoder.encode(result.content)
-            ) if confirm_overwrite?(result.file(output_file))
+            else
+              IO.write(
+                result.file(output_file),
+                output_encoder.encode(result.content)
+              ) if confirm_overwrite?(result.file(output_file))
+            end
           end
         end
       end
@@ -76,10 +82,10 @@ module Scl
         if File.exists?(filename)
           puts "File #{filename} already exists. Confirm overwrite? [Yn]"
           if gets.strip.downcase == 'y'
-            puts "Confirmed overwrite for #{filename}" if args.verbose
+            puts "Confirmed overwrite for #{filename}" if verbose?
             return true
           else
-            puts "Skipping save for #{filename}" if args.verbose
+            puts "Skipping save for #{filename}" if verbose?
             return false
           end
         end

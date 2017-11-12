@@ -28,6 +28,7 @@ require 'scl/formats/words'
 require 'scl/formats/auto'
 require 'scl/formats/hex'
 require 'scl/formats/qrcode'
+require 'scl/formats/stdout'
 
 module Scl
   class Format
@@ -38,5 +39,6 @@ module Scl
     QRCODE = Scl::QRCode.new
     HEX    = Scl::Hex.new
     AUTO   = Scl::Auto.new
+    STDOUT = Scl::Stdout.new
   end
 end

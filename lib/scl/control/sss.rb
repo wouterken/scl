@@ -11,7 +11,7 @@ module Scl
           scl sss generate --min-shares=11 --num-shares=14 -o output_file
 
       Large secrets are encoded using multiple blocks, which can create large shares.
-      An alternative more space efficient approach to this is to encode a shorter key using secret sharing,
+      An alternative, more space efficient approach to this is to encode a shorter key using secret sharing,
       and to then encrypt the large secret using this key and a block-cipher
 
       HELP
@@ -20,9 +20,9 @@ module Scl
         raise ControlError.new("Num-shares must be a positive integer") unless args.num_shares.to_i > 0
         raise ControlError.new('Num shares must be larger than or equal to min shares') unless args.num_shares.to_i >= args.min_shares.to_i
         input = read_file(input_file)
-        args.output_file ||= "secret-shares"
+        args.output_file ||= input_file
         controller.output(
-          Output.new(ss.generate(input).join("\n"), ".txt")
+          Output.new(ss.generate(input).join("\n"), ".shares")
         )
       end
 

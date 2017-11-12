@@ -5,6 +5,7 @@ require 'scl/control/aes'
 require 'scl/control/rsa'
 require 'scl/control/sss'
 require 'scl/control/dh'
+require 'scl/control/digest'
 
 module Scl
   module Control

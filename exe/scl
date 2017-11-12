@@ -19,6 +19,9 @@ Options = Struct.new(
   :output_file,
   :min_shares,
   :num_shares,
+  :block_size,
+  :block_cipher,
+  :digest,
   :help,
   :opts
 )
@@ -28,7 +31,7 @@ opt_parser = OptionParser.new do |opts|
   opts.banner = "Usage: scl [mode] [command] [options] "
 
   opts.separator ""
-  opts.separator "Where mode is one of (aes, rsa, dh, sss)"
+  opts.separator "Where mode is one of (aes, rsa, dh, sss, digest)"
   opts.separator "try scl [mode] -h or scl [mode] [command] -h for more details"
   opts.separator ""
   opts.separator "Where options are:"
@@ -37,8 +40,8 @@ opt_parser = OptionParser.new do |opts|
     args.verbose = true
   end
 
-  opts.on(%i(words qrcode base64 binary hex), "-f [FORMAT]", "--format [=FORMAT]", "Format to use for output, one of base64, qrcode, words, hex, none") do |f|
-    puts "Selected format #{f}" if args.verbose
+  opts.on(%i(words qrcode base64 binary hex stdout), "-f [FORMAT]", "--format [=FORMAT]", "Format to use for output, one of base64, qrcode, words, hex, stdout, none") do |f|
+    puts "Selected output format #{f}" if args.verbose
     args.output_format = f
   end
 
@@ -52,7 +55,7 @@ opt_parser = OptionParser.new do |opts|
     args.key_format = f
   end
 
-  opts.on("-k [KEY_PATH]", "--key-path [=KEY_PATH]", "The path of the keys to use (Looks for  [key_path].pub and [key_path].priv)") do |p|
+  opts.on("-k [KEY_PATH]", "--key-path [=KEY_PATH]", "The path of the key(s) to use (Looks for  [key_path].pub and [key_path].priv)") do |p|
     puts "Selected key path #{p}" if args.verbose
     args.key_path = p
   end
@@ -72,20 +75,34 @@ opt_parser = OptionParser.new do |opts|
     args.output_file = p
   end
 
-
   opts.on("-s [KEY_SIZE]", "--key-size [=KEY_SIZE]", Integer, "Size of the generated key") do |ks|
     puts "Using key size #{ks}" if args.verbose
     args.key_size = ks
   end
 
-  opts.on("-m [MIN_SHARES]", "--min_shares [=MIN_SHARES]", Integer, "Size of the generated key") do |ms|
+  opts.on("-m [MIN_SHARES]", "--min-shares [=MIN_SHARES]", Integer, "Size of the generated key") do |ms|
     puts "Using min shares #{ms}" if args.verbose
     args.min_shares = ms
   end
 
-  opts.on("-n [NUM_SHARES]", "--num_shares [=NUM_SHARES]", Integer, "Size of the generated key") do |ns|
+  opts.on("-n [NUM_SHARES]", "--num-shares [=NUM_SHARES]", Integer, "Size of the generated key") do |ns|
     puts "Using num shares #{ns}" if args.verbose
     args.num_shares = ns
+  end
+
+  opts.on("-S [BLOCK_SIZE]", "--block-size [=BLOCK_SIZE]", Integer, "Block size of cipher") do |bs|
+    puts "Using block size #{bs}" if args.verbose
+    args.block_size = bs
+  end
+
+  opts.on("-C [BLOCK_CIPHER]", "--block-size [=BLOCK_CIPHER]", String, "Block cipher") do |bc|
+    puts "Using block cipher #{bc}" if args.verbose
+    args.block_cipher = bc
+  end
+
+  opts.on('-d [DIGEST]', '--digest [=DIGEST]', String, 'Digest (e.g. sha256)') do |dg|
+    puts "Using digest #{dg}" if args.verbose
+    args.digest = dg
   end
 
   opts.on("-h", "--help", "Prints this help") do

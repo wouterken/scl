@@ -4,6 +4,7 @@ require "scl/rsa"
 require "scl/aes"
 require "scl/secret_share"
 require "scl/control"
+require "scl/digest"
 require "scl/formats/format"
 require 'openssl'
 

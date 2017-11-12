@@ -1,12 +1,12 @@
 module Scl
   class AES
-    def initialize(block_size=256, cipher_text=:CBC)
-      @cipher_text = cipher_text
-      @block_size = block_size
+    def initialize(block_size=256, block_cipher=:CBC)
+      @block_cipher = block_cipher || :CBC
+      @block_size = block_size || 256
     end
 
     def build_cypher
-      OpenSSL::Cipher::AES.new(@block_size, @cipher_text)
+      OpenSSL::Cipher::AES.new(@block_size, @block_cipher)
     end
 
     def encrypt(plaintext, key=nil, iv=nil)
