@@ -24,10 +24,10 @@ end
 
 require 'scl/formats/base64'
 require 'scl/formats/binary'
-require 'scl/formats/qrcode'
 require 'scl/formats/words'
 require 'scl/formats/auto'
 require 'scl/formats/hex'
+require 'scl/formats/qrcode'
 
 module Scl
   class Format

@@ -4,8 +4,8 @@ module Scl
       attr_reader :args
       def initialize(args)
         @args = args
-        puts "Using output format #{@output_encoder.name}" if args.verbose
-        puts "Using input format #{@input_decoder.name}" if args.verbose
+        puts "Using output format #{output_encoder.name}" if verbose?
+        puts "Using input format #{input_decoder.name}" if verbose?
       end
 
       def output_encoder
@@ -20,9 +20,12 @@ module Scl
         coder_for(args.key_format)
       end
 
-
       def output_file
         "#{@args.output_file}".strip
+      end
+
+      def verbose?
+        @args.verbose
       end
 
       def module(module_name)
@@ -30,9 +33,10 @@ module Scl
         when "aes" then Control::AES.new(self)
         when "rsa" then Control::RSA.new(self)
         when "dh"  then Control::DH.new(self)
-        when "dh"  then Control::SSS.new(self)
+        when "sss"  then Control::SSS.new(self)
         else
-          puts "No module found \"#{module_name}\""
+          puts "No scl module found \"#{module_name}\""
+          puts args.opts
           exit(1)
         end
       end
@@ -59,6 +63,7 @@ module Scl
           puts results.map{|r| output_encoder.encode(r.content) }.join("\n\n")
         else
           results.each do |result|
+            puts "Writing #{result.file(output_file)}" if verbose?
             IO.write(
               result.file(output_file),
               output_encoder.encode(result.content)

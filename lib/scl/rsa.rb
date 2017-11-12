@@ -55,7 +55,7 @@ module Scl
       end
 
       def decrypt(ciphertext)
-        encrypted_key, iv, ciphertext = ciphertext.split('::')
+        encrypted_key, iv, ciphertext = ciphertext.split('::', 3)
         decrypted_key =
           case
           when rsa.private? then rsa.private_decrypt(encrypted_key)

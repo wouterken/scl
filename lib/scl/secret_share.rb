@@ -81,10 +81,10 @@ module Scl
       x % p
     end
 
-    def self.combine(shares)
+    def self.combine(shares, encoder: nil)
       abs = ->(v){ v < 0 ? v * -1 : v}
       decoded = shares.map do |share|
-        share = @encoder == Format::BASE64 ? share : @encoder.decode(share)
+        share = encoder && encoder != Format::BASE64 ? encoder.decode(share) : share
         share.chars.each_slice(ENCODED_CHUNK_SIZE).map(&:join).each_slice(2).map do |random, polynomial|
           OpenStruct.new({
             x: base64_decode(random),
