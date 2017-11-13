@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Scl::VERSION
   spec.authors       = ["Wouter Coppieters"]
   spec.email         = ["wouter@youdo.co.nz"]
-
+  spec.homepage      = "https://github.com/wouterken/scl"
   spec.summary       = "Simple crypto library"
   spec.description   = "Simple crypto library"
 
