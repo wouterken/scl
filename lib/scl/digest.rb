@@ -18,7 +18,7 @@ module Scl
       def self.digest_exists?(digest)
         begin
           OpenSSL::Digest.const_get(digest.upcase)
-        rescue NameError => e
+        rescue NameError
           puts "Couldn't get digest type. #{digest}"
           puts "Try $ scl digest list  – for a list of supported digests"
           return false

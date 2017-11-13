@@ -5,12 +5,12 @@ module Scl
       @block_size = block_size || 256
     end
 
-    def build_cypher
+    def build_cipher
       OpenSSL::Cipher::AES.new(@block_size, @block_cipher)
     end
 
     def encrypt(plaintext, key=nil, iv=nil)
-      block_cipher = build_cypher
+      block_cipher = build_cipher
       block_cipher.encrypt
       block_cipher.key = key ||= block_cipher.random_key
       block_cipher.iv  = iv  ||= block_cipher.random_iv
@@ -18,7 +18,7 @@ module Scl
     end
 
     def decrypt(ciphertext, key, iv)
-      block_cipher = build_cypher
+      block_cipher = build_cipher
       block_cipher.decrypt
       block_cipher.key = key
       block_cipher.iv  =  iv

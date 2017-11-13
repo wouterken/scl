@@ -9,13 +9,14 @@ module Scl
         @public  = public
         @private = private
       end
+      @output_encoder = output_encoder
       @public  = Key.new(@public)
       @private = Key.new(@private)
     end
 
     def save(dir, name='rsa-keypair')
-      IO.write(File.join(dir, "#{name}.pub"),  output_encoder.encode(@public.export))
-      IO.write(File.join(dir, "#{name}.priv"), output_encoder.encode(@private.export))
+      IO.write(File.join(dir, "#{name}.pub"),  @output_encoder.encode(@public.export))
+      IO.write(File.join(dir, "#{name}.priv"), @output_encoder.encode(@private.export))
       dir
     end
 
@@ -24,8 +25,8 @@ module Scl
       RSA.new(public: rsa_pair.public_key, private: rsa_pair)
     end
 
-    def self.encrypt(msg)
-      pair = self.generate
+    def self.encrypt(msg, key_size=1024)
+      pair = self.generate(key_size)
       [pair.private.export, pair.public.export, pair.private.encrypt(msg)]
     end
 

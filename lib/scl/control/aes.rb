@@ -42,6 +42,16 @@ module Scl
         )
       end
 
+      help <<-HELP,
+      ciphers. Prints a list of supported ciphers
+
+        e.g
+          scl aes ciphers
+      HELP
+      def ciphers
+        puts OpenSSL::Cipher.ciphers.select{|x| x[/^aes/]}
+      end
+
       private
         def aes
           Scl::AES.new(args.block_size, args.block_cipher)

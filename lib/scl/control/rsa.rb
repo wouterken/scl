@@ -18,7 +18,7 @@ module Scl
             Output.new(result.public.export, '.pub'),
             Output.new(result.private.export, '.priv')
           )
-        rescue StandardError => e
+        rescue StandardError
           raise ControlError.new("Couldn't generate key of size #{args.key_size}")
         end
       end

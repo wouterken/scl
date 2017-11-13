@@ -1,7 +1,7 @@
 module Scl
   class Scl::Auto < Scl::Format
     def encode(data)
-      sorted = (data.chars.map(&:ord).uniq.sort) - [10]
+      sorted = (data.force_encoding("binary").chars.map(&:ord).uniq.sort) - [10]
       if sorted.first < 32 || sorted.max > 126
         Scl::Format::BASE64.encode(data)
       else
@@ -11,7 +11,7 @@ module Scl
 
     def decode(data)
       png = Regexp.new("\x89PNG".force_encoding("binary"))
-      if /^#{png}/ === data
+      if /^#{png}/ === data.force_encoding("binary")
         Scl::Format::QRCODE.decode(data)
       elsif data[/[^A-Za-z0-9\+\/\n=]/]
         Scl::Format::BINARY.decode(data)

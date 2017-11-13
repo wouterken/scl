@@ -46,7 +46,6 @@ module Scl
         case "#{format}".strip
         when "base64"               then Format::BASE64
         when "qrcode"               then Format::QRCODE
-        when "base64"               then Format::BASE64
         when "words"                then Format::WORDS
         when "hex"                  then Format::HEX
         when "binary","text","none" then Format::BINARY

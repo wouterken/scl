@@ -17,7 +17,7 @@ module Scl
         b1 = (bytes >> 8) & 255
         [b1, b2]
       end.flatten
-      bytes.map(&:chr).join
+      bytes.map(&:chr).join.gsub(/\x00$/,'')
     end
   end
 end
