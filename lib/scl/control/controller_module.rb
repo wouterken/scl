@@ -88,7 +88,7 @@ module Scl
       end
 
       private
-        def read_file(file, label='', help)
+        def read_file(file, label='', help='')
           unless file
             raise ControlError.new("Expected #{label} file not given\n#{help}")
           end

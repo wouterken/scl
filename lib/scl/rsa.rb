@@ -1,6 +1,8 @@
 module Scl
   class RSA
     attr_reader :private, :public
+    DELIMITER = "\x0::\x0"
+
     def initialize(file: nil, public: nil, private: nil, input_encoder: Format::BINARY, output_encoder: Format::BINARY)
       if file
         @public  = OpenSSL::PKey::RSA.new(encoder.decode(IO.read("#{file}.pub"))) if File.exists?("#{file}.pub")
@@ -20,7 +22,7 @@ module Scl
       dir
     end
 
-    def self.generate(key_size)
+    def self.generate(key_size=1024)
       rsa_pair = OpenSSL::PKey::RSA.new(key_size || 2048)
       RSA.new(public: rsa_pair.public_key, private: rsa_pair)
     end
@@ -52,11 +54,11 @@ module Scl
           when rsa.private? then rsa.private_encrypt(key)
           else rsa.public_encrypt(key)
           end
-        [encrypted_key, iv, ciphertext].join('::')
+        [encrypted_key, iv, ciphertext].join(DELIMITER)
       end
 
       def decrypt(ciphertext)
-        encrypted_key, iv, ciphertext = ciphertext.split('::', 3)
+        encrypted_key, iv, ciphertext = ciphertext.split(DELIMITER, 3)
         decrypted_key =
           case
           when rsa.private? then rsa.private_decrypt(encrypted_key)
