@@ -1,5 +1,9 @@
 # Scl (Simple Crypto Library)
 
+[![scl](https://img.shields.io/badge/scl--green.svg)](https://github.com/wouterken/scl)
+[![Gem Version](https://badge.fury.io/rb/scl.svg)](http://badge.fury.io/rb/scl)
+[![Downloads](https://img.shields.io/gem/dt/scl/stable.svg)](https://img.shields.io/gem/dt/scl)
+
 Scl is the Ruby *Simple Cryptography Library*. It comes with both a library for use in a Ruby codebase and a fully featured command line tool for all of your basic cryptography needs.
 
 As anybody in the crypto space knows, using a cryptography library that has not been extensively audited and battle-tested in a security critical system is asking for trouble, hence:<br/>
